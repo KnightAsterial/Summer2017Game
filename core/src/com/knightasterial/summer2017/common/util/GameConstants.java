@@ -11,7 +11,7 @@ public class GameConstants {
 	 */
 	public static final int DEFAULT_WINDOW_HEIGHT = 720;
 	
-	public static final float PIXEL_TO_METER_RATIO = 1/25f;
+	public static final float PIXEL_TO_METER_RATIO = 0.04f;
 	
 	public static final float METER_TO_PIXEL_RATIO = 25;
 	

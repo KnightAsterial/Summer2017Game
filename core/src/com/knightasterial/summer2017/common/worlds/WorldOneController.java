@@ -125,4 +125,8 @@ public class WorldOneController {
 	private float pxToMeters(int pixels){
 		return pixels*GameConstants.PIXEL_TO_METER_RATIO;
 	}
+	
+	private int metersToPx(float meters) {
+		return (int) (meters * GameConstants.METER_TO_PIXEL_RATIO);
+	}
 }
