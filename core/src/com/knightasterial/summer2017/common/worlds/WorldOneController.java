@@ -33,8 +33,13 @@ public class WorldOneController {
 
 	public void init(){
 		box2DWorld = new World(new Vector2(0,-10), true);
+		initializeFloor();
+		initializeWall();
+		initializePlayer();
 		
-		
+	}
+	
+	private void initializeFloor() {
 		//INITIALIZES FLOOR
 		BodyDef groundBodyDef = new BodyDef();
 		groundBodyDef.type = BodyType.StaticBody;
@@ -47,12 +52,28 @@ public class WorldOneController {
 		//adds the fixture to the body
 		groundBody.createFixture(groundBox, 0.0f);
 		groundBox.dispose();
+	}
+	private void initializeWall() {
+
+		BodyDef wallDef = new BodyDef();
+		wallDef.type = BodyType.StaticBody;
+		//origin is center of the body
+		wallDef.position.set(new Vector2( pxToMeters(400),pxToMeters(100) ));
+		//adds the body to the world
+		wall = box2DWorld.createBody(wallDef);
+		PolygonShape wallBox = new PolygonShape();
+		wallBox.setAsBox(pxToMeters(20), pxToMeters(60));
+		//adds the fixture to the body
+		wall.createFixture(wallBox, 0.0f);
+		wallBox.dispose();
 		
-		//INITIALIZES PLAYER
+	}
+	private void initializePlayer() {
 		BodyDef playerDef = new BodyDef();
 		playerDef.type = BodyType.DynamicBody;
 		playerDef.position.set(new Vector2( pxToMeters(50), pxToMeters(200) ));
 		player = box2DWorld.createBody(playerDef);
+		player.setFixedRotation(true);
 		
 		//Creates box for player
 		PolygonShape square = new PolygonShape();
@@ -64,6 +85,7 @@ public class WorldOneController {
 		playerFixtureDef.restitution = 0.0f;
 		playerFixture = player.createFixture(playerFixtureDef);
 		square.dispose();
+<<<<<<< HEAD
 		BodyDef wallDef = new BodyDef();
 		wallDef.type = BodyType.StaticBody;
 		//origin is center of the body
@@ -77,6 +99,8 @@ public class WorldOneController {
 		wallBox.dispose();
 		
 		
+=======
+>>>>>>> origin/master
 	}
 	
 	public void update(float delta){
