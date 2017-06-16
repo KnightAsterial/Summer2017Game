@@ -37,6 +37,8 @@ public class WorldOneController {
 		initializeWall();
 		initializePlayer();
 		
+		
+		
 	}
 	
 	private void initializeFloor() {
@@ -115,6 +117,11 @@ public class WorldOneController {
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
 			player.applyLinearImpulse(0, 20f, pos.x, pos.y, true);
 		}
+
+		if (player.getPosition().x > (inGameCamera.position.x + (inGameCamera.viewportWidth/4))){
+			inGameCamera.translate(player.getPosition().x - (inGameCamera.position.x + (inGameCamera.viewportWidth/4)), 0);
+		}
+
 		
 		doPhysicsStep(delta);
 	}

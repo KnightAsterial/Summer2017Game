@@ -53,7 +53,7 @@ public class WorldOneScreen implements Screen{
 
 	@Override
 	public void render(float delta) {
-
+		inGameCamera.update();
 		
 		batch.setProjectionMatrix(inGameCamera.combined);
 		batch.begin();
