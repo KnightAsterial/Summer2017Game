@@ -33,8 +33,13 @@ public class WorldOneController {
 
 	public void init(){
 		box2DWorld = new World(new Vector2(0,-10), true);
+		initializeFloor();
+		initializeWall();
+		initializePlayer();
 		
-		
+	}
+	
+	private void initializeFloor() {
 		//INITIALIZES FLOOR
 		BodyDef groundBodyDef = new BodyDef();
 		groundBodyDef.type = BodyType.StaticBody;
@@ -47,23 +52,9 @@ public class WorldOneController {
 		//adds the fixture to the body
 		groundBody.createFixture(groundBox, 0.0f);
 		groundBox.dispose();
-		
-		//INITIALIZES PLAYER
-		BodyDef playerDef = new BodyDef();
-		playerDef.type = BodyType.DynamicBody;
-		playerDef.position.set(new Vector2( pxToMeters(50), pxToMeters(200) ));
-		player = box2DWorld.createBody(playerDef);
-		
-		//Creates box for player
-		PolygonShape square = new PolygonShape();
-		square.setAsBox(1, 1);
-		FixtureDef playerFixtureDef = new FixtureDef();
-		playerFixtureDef.shape = square;
-		playerFixtureDef.density = 0.985f;
-		playerFixtureDef.friction = 0.4f;
-		playerFixtureDef.restitution = 0.0f;
-		playerFixture = player.createFixture(playerFixtureDef);
-		square.dispose();
+	}
+	private void initializeWall() {
+
 		BodyDef wallDef = new BodyDef();
 		wallDef.type = BodyType.StaticBody;
 		//origin is center of the body
@@ -76,6 +67,24 @@ public class WorldOneController {
 		wall.createFixture(wallBox, 0.0f);
 		wallBox.dispose();
 		
+	}
+	private void initializePlayer() {
+		BodyDef playerDef = new BodyDef();
+		playerDef.type = BodyType.DynamicBody;
+		playerDef.position.set(new Vector2( pxToMeters(50), pxToMeters(200) ));
+		player = box2DWorld.createBody(playerDef);
+		player.setFixedRotation(true);
+		
+		//Creates box for player
+		PolygonShape square = new PolygonShape();
+		square.setAsBox(1, 1);
+		FixtureDef playerFixtureDef = new FixtureDef();
+		playerFixtureDef.shape = square;
+		playerFixtureDef.density = 0.985f;
+		playerFixtureDef.friction = 0.4f;
+		playerFixtureDef.restitution = 0.0f;
+		playerFixture = player.createFixture(playerFixtureDef);
+		square.dispose();
 	}
 	
 	public void update(float delta){
