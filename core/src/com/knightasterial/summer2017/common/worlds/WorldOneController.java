@@ -35,7 +35,7 @@ public class WorldOneController {
 	public void init(){
 		box2DWorld = new World(new Vector2(0,-10), true);
 		
-
+		
 		//INITIALIZES FLOOR
 		BodyDef groundBodyDef = new BodyDef();
 		groundBodyDef.type = BodyType.StaticBody;
