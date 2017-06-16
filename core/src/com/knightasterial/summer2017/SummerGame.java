@@ -1,33 +1,45 @@
 package com.knightasterial.summer2017;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SummerGame extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.knightasterial.summer2017.client.screens.WorldOneScreen;
+import com.knightasterial.summer2017.common.worlds.WorldOneController;
+
+public class SummerGame extends Game {
+	WorldOneController worldController1 = new WorldOneController();
+	WorldOneScreen worldScreen1;
+	List<Screen> screensToDispose;
 	
 	@Override
 	public void create () {
-		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+		screensToDispose = new ArrayList<Screen>();
+		
+		worldController1 = new WorldOneController();
+		worldScreen1 = new WorldOneScreen(this, worldController1);
+		worldController1.setInGameCamera(worldScreen1.getInGameCamera());
+		setScreen(worldScreen1);
+		
+		
 	}
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-		batch.draw(img, 0, 0);
-		batch.end();
+		
+		//renders the current set screen
+		super.render();		
 	}
 	
 	@Override
 	public void dispose () {
-		batch.dispose();
-		img.dispose();
+		for (Screen screen : screensToDispose){
+			screen.dispose();
+		}
 	}
 }
