@@ -29,5 +29,5 @@ public class SummerGame extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
-	}
+	} //testing 123
 }
