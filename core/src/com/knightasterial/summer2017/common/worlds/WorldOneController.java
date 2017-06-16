@@ -55,16 +55,16 @@ public class WorldOneController {
 		playerDef.position.set(new Vector2( pxToMeters(50), pxToMeters(200) ));
 		player = box2DWorld.createBody(playerDef);
 		
-		CircleShape circle = new CircleShape();
-		circle.setRadius(pxToMeters(25));
+		//Creates box for player
+		PolygonShape square = new PolygonShape();
+		square.setAsBox(1, 1);
 		FixtureDef playerFixtureDef = new FixtureDef();
-		playerFixtureDef.shape = circle;
+		playerFixtureDef.shape = square;
 		playerFixtureDef.density = 0.985f;
 		playerFixtureDef.friction = 0.4f;
 		playerFixtureDef.restitution = 0.0f;
 		playerFixture = player.createFixture(playerFixtureDef);
-		circle.dispose();
-		
+		square.dispose();
 		BodyDef wallDef = new BodyDef();
 		wallDef.type = BodyType.StaticBody;
 		//origin is center of the body
