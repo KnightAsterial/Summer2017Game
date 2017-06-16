@@ -85,7 +85,6 @@ public class WorldOneController {
 		playerFixtureDef.restitution = 0.0f;
 		playerFixture = player.createFixture(playerFixtureDef);
 		square.dispose();
-<<<<<<< HEAD
 		BodyDef wallDef = new BodyDef();
 		wallDef.type = BodyType.StaticBody;
 		//origin is center of the body
@@ -98,9 +97,6 @@ public class WorldOneController {
 		wall.createFixture(wallBox, 0.0f);
 		wallBox.dispose();
 		
-		
-=======
->>>>>>> origin/master
 	}
 	
 	public void update(float delta){
