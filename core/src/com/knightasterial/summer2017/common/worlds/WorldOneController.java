@@ -76,6 +76,7 @@ public class WorldOneController {
 		wall.createFixture(wallBox, 0.0f);
 		wallBox.dispose();
 		
+		
 	}
 	
 	public void update(float delta){
