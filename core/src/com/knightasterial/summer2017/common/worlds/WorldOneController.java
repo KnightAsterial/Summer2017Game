@@ -11,9 +11,12 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.RopeJoint;
+import com.badlogic.gdx.physics.box2d.joints.RopeJointDef;
+import com.badlogic.gdx.utils.Disposable;
 import com.knightasterial.summer2017.common.util.GameConstants;
 
-public class WorldOneController {
+public class WorldOneController implements Disposable{
 	
 	World box2DWorld;
 	Body player;
@@ -26,6 +29,13 @@ public class WorldOneController {
 	
 	OrthographicCamera inGameCamera = new OrthographicCamera();
 	
+	/**
+	 * in pixels
+	 */
+	int xOriginOfLastGeneratedFloor;
+	
+	PolygonShape basicGroundUnit;
+	
 	public WorldOneController(){
 		init();
 	}
@@ -33,12 +43,21 @@ public class WorldOneController {
 
 	public void init(){
 		box2DWorld = new World(new Vector2(0,-10), true);
+		
+		basicGroundUnit = new PolygonShape();
+		basicGroundUnit.setAsBox(pxToMeters(25), pxToMeters(20));
+		
 		initializeFloor();
 		initializeWall();
 		initializePlayer();
 		
-		
-		
+		/*
+		RopeJointDef ropePlayerWallDef = new RopeJointDef();
+		ropePlayerWallDef.maxLength = pxToMeters(500);
+		ropePlayerWallDef.bodyA = player;
+		ropePlayerWallDef.bodyB = wall;
+		RopeJoint ropePlayerWall = (RopeJoint) box2DWorld.createJoint(ropePlayerWallDef);
+		*/
 	}
 	
 	private void initializeFloor() {
@@ -50,10 +69,11 @@ public class WorldOneController {
 		//adds the body to the world
 		groundBody = box2DWorld.createBody(groundBodyDef);
 		PolygonShape groundBox = new PolygonShape();
-		groundBox.setAsBox(pxToMeters(1281), pxToMeters(20));
+		groundBox.setAsBox(pxToMeters(1380), pxToMeters(20));
 		//adds the fixture to the body
 		groundBody.createFixture(groundBox, 0.0f);
 		groundBox.dispose();
+		xOriginOfLastGeneratedFloor = 1355;
 	}
 	private void initializeWall() {
 
@@ -104,7 +124,7 @@ public class WorldOneController {
 	public void update(float delta){
 		Vector2 vel = player.getLinearVelocity();
 		Vector2 pos = player.getPosition();
-				
+		
 		// apply left impulse, but only if max velocity is not reached yet
 		if (Gdx.input.isKeyPressed(Keys.A) && vel.x > -GameConstants.PLAYER_MAX_WALK_VELOCITY) {			
 		     player.applyLinearImpulse(-1.4f, 0, pos.x, pos.y, true);
@@ -113,15 +133,25 @@ public class WorldOneController {
 		if (Gdx.input.isKeyPressed(Keys.D) && vel.x < GameConstants.PLAYER_MAX_WALK_VELOCITY) {
 		     player.applyLinearImpulse(1.4f, 0, pos.x, pos.y, true);
 		}
-		
+		// apply vertical jump impulse
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
 			player.applyLinearImpulse(0, 20f, pos.x, pos.y, true);
 		}
-
+		
+		//if camera moves forwards
 		if (player.getPosition().x > (inGameCamera.position.x + (inGameCamera.viewportWidth/4))){
 			inGameCamera.translate(player.getPosition().x - (inGameCamera.position.x + (inGameCamera.viewportWidth/4)), 0);
+			if ((inGameCamera.position.x + inGameCamera.viewportWidth/2) - xOriginOfLastGeneratedFloor < 100){
+				BodyDef genFloor = new BodyDef();
+				genFloor.type = BodyType.StaticBody;
+				genFloor.position.set(new Vector2(pxToMeters(xOriginOfLastGeneratedFloor + 50), pxToMeters(20)));
+				box2DWorld.createBody(genFloor).createFixture(basicGroundUnit, 0.0f);
+				xOriginOfLastGeneratedFloor += 50;
+				
+			}
 		}
-
+		
+		System.out.println(delta);
 		
 		doPhysicsStep(delta);
 	}
@@ -155,5 +185,11 @@ public class WorldOneController {
 	
 	private int metersToPx(float meters) {
 		return (int) (meters * GameConstants.METER_TO_PIXEL_RATIO);
+	}
+
+
+	@Override
+	public void dispose() {
+		basicGroundUnit.dispose();
 	}
 }
