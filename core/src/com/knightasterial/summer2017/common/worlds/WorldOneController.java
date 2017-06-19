@@ -1,5 +1,7 @@
 package com.knightasterial.summer2017.common.worlds;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,9 +13,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.joints.RopeJoint;
-import com.badlogic.gdx.physics.box2d.joints.RopeJointDef;
 import com.badlogic.gdx.utils.Disposable;
+import com.knightasterial.summer2017.common.map.BasicGroundUnit;
 import com.knightasterial.summer2017.common.util.GameConstants;
 
 public class WorldOneController implements Disposable{
@@ -33,8 +34,8 @@ public class WorldOneController implements Disposable{
 	 * in pixels
 	 */
 	int xOriginOfLastGeneratedFloor;
-	
-	PolygonShape basicGroundUnit;
+	ArrayList<BasicGroundUnit> groundTiles;
+	//TODO DELETE FLOOR THAT IS OFF SCREEN
 	
 	public WorldOneController(){
 		init();
@@ -44,12 +45,11 @@ public class WorldOneController implements Disposable{
 	public void init(){
 		box2DWorld = new World(new Vector2(0,-10), true);
 		
-		basicGroundUnit = new PolygonShape();
-		basicGroundUnit.setAsBox(pxToMeters(25), pxToMeters(20));
-		
 		initializeFloor();
 		initializeWall();
 		initializePlayer();
+		
+		groundTiles = new ArrayList<BasicGroundUnit>();
 		
 		/*
 		RopeJointDef ropePlayerWallDef = new RopeJointDef();
@@ -140,18 +140,15 @@ public class WorldOneController implements Disposable{
 		
 		//if camera moves forwards
 		if (player.getPosition().x > (inGameCamera.position.x + (inGameCamera.viewportWidth/4))){
+			//moves camera forwards
 			inGameCamera.translate(player.getPosition().x - (inGameCamera.position.x + (inGameCamera.viewportWidth/4)), 0);
+			//generates new BASE floor tiles
 			if ((inGameCamera.position.x + inGameCamera.viewportWidth/2) - xOriginOfLastGeneratedFloor < 100){
-				BodyDef genFloor = new BodyDef();
-				genFloor.type = BodyType.StaticBody;
-				genFloor.position.set(new Vector2(pxToMeters(xOriginOfLastGeneratedFloor + 50), pxToMeters(20)));
-				box2DWorld.createBody(genFloor).createFixture(basicGroundUnit, 0.0f);
+				groundTiles.add(new BasicGroundUnit(box2DWorld, pxToMeters(xOriginOfLastGeneratedFloor+50), pxToMeters(20)));			
 				xOriginOfLastGeneratedFloor += 50;
-				
 			}
 		}
 		
-		System.out.println(delta);
 		
 		doPhysicsStep(delta);
 	}
@@ -190,6 +187,5 @@ public class WorldOneController implements Disposable{
 
 	@Override
 	public void dispose() {
-		basicGroundUnit.dispose();
 	}
 }
