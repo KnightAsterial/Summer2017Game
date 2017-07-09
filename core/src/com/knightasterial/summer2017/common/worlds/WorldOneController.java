@@ -1,6 +1,7 @@
 package com.knightasterial.summer2017.common.worlds;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -15,7 +16,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.knightasterial.summer2017.common.map.BasicGroundUnit;
+import com.knightasterial.summer2017.common.projectiles.BasicProjectile;
 import com.knightasterial.summer2017.common.util.GameConstants;
+import com.knightasterial.summer2017.common.util.IOUtil;
 
 public class WorldOneController implements Disposable{
 	
@@ -35,7 +38,11 @@ public class WorldOneController implements Disposable{
 	 */
 	int xOriginOfLastGeneratedFloor;
 	ArrayList<BasicGroundUnit> groundTiles;
-	//TODO DELETE FLOOR THAT IS OFF SCREEN
+	private BasicGroundUnit groundToDestroy;
+	
+	ArrayList<BasicProjectile> projectiles;
+	Vector2 tempProjectileVector;
+	Vector2 tempUpdatedOriginOfProjectile;
 	
 	public WorldOneController(){
 		init();
@@ -50,6 +57,7 @@ public class WorldOneController implements Disposable{
 		initializePlayer();
 		
 		groundTiles = new ArrayList<BasicGroundUnit>();
+		projectiles = new ArrayList<BasicProjectile>();
 		
 		/*
 		RopeJointDef ropePlayerWallDef = new RopeJointDef();
@@ -137,6 +145,14 @@ public class WorldOneController implements Disposable{
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
 			player.applyLinearImpulse(0, 20f, pos.x, pos.y, true);
 		}
+		if (Gdx.input.isTouched()){
+			tempProjectileVector = IOUtil.getMouseVector(inGameCamera);
+			tempProjectileVector.sub(player.getPosition()).nor().scl(GameConstants.BASE_PROJECTILE_FORCE);
+			//makes it originate not entirely from player origin, but slightly in a direction towards mouse so it pops out of player correctly
+			tempUpdatedOriginOfProjectile = new Vector2().set(player.getPosition()).add(tempProjectileVector.cpy().nor().scl(pxToMeters(20)));
+			System.out.println("(" + tempProjectileVector.x + "," + tempProjectileVector.y + ")");
+			projectiles.add(new BasicProjectile(box2DWorld, tempUpdatedOriginOfProjectile.x, tempUpdatedOriginOfProjectile.y, tempProjectileVector));
+		}
 		
 		//if camera moves forwards
 		if (player.getPosition().x > (inGameCamera.position.x + (inGameCamera.viewportWidth/4))){
@@ -147,13 +163,28 @@ public class WorldOneController implements Disposable{
 				groundTiles.add(new BasicGroundUnit(box2DWorld, pxToMeters(xOriginOfLastGeneratedFloor+50), pxToMeters(20)));			
 				xOriginOfLastGeneratedFloor += 50;
 			}
+			//deletes off screen ground units
+			deleteOffScreenGroundUnits();
 		}
-		
 		
 		doPhysicsStep(delta);
 	}
 	
-	
+	private void deleteOffScreenGroundUnits(){
+		//Deletes off screen tiles
+		Iterator<BasicGroundUnit> deleteGroundIter = groundTiles.iterator();
+		while (deleteGroundIter.hasNext()){
+			groundToDestroy = deleteGroundIter.next();
+			if (groundToDestroy.x < (inGameCamera.position.x - (inGameCamera.viewportWidth/2))-26){
+				groundToDestroy.dispose();
+				deleteGroundIter.remove();
+			}
+			//heh, efficiency :P don't need to search entire thing because we know tiles are ordered from olders to newest :D
+			else{
+				break;
+			}
+		}
+	}
 	
 	public World getWorld(){
 		return box2DWorld;
