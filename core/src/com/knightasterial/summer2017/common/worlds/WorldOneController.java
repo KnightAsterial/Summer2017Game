@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.knightasterial.summer2017.common.entities.PlayerEntity;
 import com.knightasterial.summer2017.common.map.BasicGroundUnit;
 import com.knightasterial.summer2017.common.projectiles.BasicProjectile;
 import com.knightasterial.summer2017.common.util.GameConstants;
@@ -23,8 +24,7 @@ import com.knightasterial.summer2017.common.util.IOUtil;
 public class WorldOneController implements Disposable{
 	
 	World box2DWorld;
-	Body player;
-	Fixture playerFixture;
+	PlayerEntity player;
 	Body groundBody;
 	
 	
@@ -41,8 +41,7 @@ public class WorldOneController implements Disposable{
 	private BasicGroundUnit groundToDestroy;
 	
 	ArrayList<BasicProjectile> projectiles;
-	Vector2 tempProjectileVector;
-	Vector2 tempUpdatedOriginOfProjectile;
+
 	
 	public WorldOneController(){
 		init();
@@ -54,7 +53,7 @@ public class WorldOneController implements Disposable{
 		
 		initializeFloor();
 		initializeWall();
-		initializePlayer();
+		player = new PlayerEntity(box2DWorld);
 		
 		groundTiles = new ArrayList<BasicGroundUnit>();
 		projectiles = new ArrayList<BasicProjectile>();
@@ -98,66 +97,34 @@ public class WorldOneController implements Disposable{
 		wallBox.dispose();
 		
 	}
-	private void initializePlayer() {
-		BodyDef playerDef = new BodyDef();
-		playerDef.type = BodyType.DynamicBody;
-		playerDef.position.set(new Vector2( pxToMeters(50), pxToMeters(200) ));
-		player = box2DWorld.createBody(playerDef);
-		player.setFixedRotation(true);
-		
-		//Creates box for player
-		PolygonShape square = new PolygonShape();
-		square.setAsBox(1, 1);
-		FixtureDef playerFixtureDef = new FixtureDef();
-		playerFixtureDef.shape = square;
-		playerFixtureDef.density = 0.985f;
-		playerFixtureDef.friction = 0.4f;
-		playerFixtureDef.restitution = 0.0f;
-		playerFixture = player.createFixture(playerFixtureDef);
-		square.dispose();
-		BodyDef wallDef = new BodyDef();
-		wallDef.type = BodyType.StaticBody;
-		//origin is center of the body
-		wallDef.position.set(new Vector2( pxToMeters(400),pxToMeters(100) ));
-		//adds the body to the world
-		wall = box2DWorld.createBody(wallDef);
-		PolygonShape wallBox = new PolygonShape();
-		wallBox.setAsBox(pxToMeters(20), pxToMeters(60));
-		//adds the fixture to the body
-		wall.createFixture(wallBox, 0.0f);
-		wallBox.dispose();
-		
-	}
+
 	
 	public void update(float delta){
-		Vector2 vel = player.getLinearVelocity();
-		Vector2 pos = player.getPosition();
+		Vector2 vel = player.body.getLinearVelocity();
+		Vector2 pos = player.body.getPosition();
 		
 		// apply left impulse, but only if max velocity is not reached yet
 		if (Gdx.input.isKeyPressed(Keys.A) && vel.x > -GameConstants.PLAYER_MAX_WALK_VELOCITY) {			
-		     player.applyLinearImpulse(-1.4f, 0, pos.x, pos.y, true);
+		     player.body.applyLinearImpulse(-1.4f, 0, pos.x, pos.y, true);
 		}
 		// apply right impulse, but only if max velocity is not reached yet
 		if (Gdx.input.isKeyPressed(Keys.D) && vel.x < GameConstants.PLAYER_MAX_WALK_VELOCITY) {
-		     player.applyLinearImpulse(1.4f, 0, pos.x, pos.y, true);
+		     player.body.applyLinearImpulse(1.4f, 0, pos.x, pos.y, true);
 		}
 		// apply vertical jump impulse
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
-			player.applyLinearImpulse(0, 20f, pos.x, pos.y, true);
+			player.body.applyLinearImpulse(0, 20f, pos.x, pos.y, true);
 		}
 		if (Gdx.input.isTouched()){
-			tempProjectileVector = IOUtil.getMouseVector(inGameCamera);
-			tempProjectileVector.sub(player.getPosition()).nor().scl(GameConstants.BASE_PROJECTILE_FORCE);
-			//makes it originate not entirely from player origin, but slightly in a direction towards mouse so it pops out of player correctly
-			tempUpdatedOriginOfProjectile = new Vector2().set(player.getPosition()).add(tempProjectileVector.cpy().nor().scl(pxToMeters(20)));
-			System.out.println("(" + tempProjectileVector.x + "," + tempProjectileVector.y + ")");
-			projectiles.add(new BasicProjectile(box2DWorld, tempUpdatedOriginOfProjectile.x, tempUpdatedOriginOfProjectile.y, tempProjectileVector));
+			if (player.canShoot()){
+				player.shoot(IOUtil.getMouseVector(inGameCamera), projectiles);
+			}
 		}
 		
 		//if camera moves forwards
-		if (player.getPosition().x > (inGameCamera.position.x + (inGameCamera.viewportWidth/4))){
+		if (player.body.getPosition().x > (inGameCamera.position.x + (inGameCamera.viewportWidth/4))){
 			//moves camera forwards
-			inGameCamera.translate(player.getPosition().x - (inGameCamera.position.x + (inGameCamera.viewportWidth/4)), 0);
+			inGameCamera.translate(player.body.getPosition().x - (inGameCamera.position.x + (inGameCamera.viewportWidth/4)), 0);
 			//generates new BASE floor tiles
 			if ((inGameCamera.position.x + inGameCamera.viewportWidth/2) - xOriginOfLastGeneratedFloor < 100){
 				groundTiles.add(new BasicGroundUnit(box2DWorld, pxToMeters(xOriginOfLastGeneratedFloor+50), pxToMeters(20)));			

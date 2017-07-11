@@ -17,7 +17,15 @@ public class GameConstants {
 	
 	public static final float PHYSICS_TIME_STEP = 1/45f;
 	
+	
+	//-------------------------------------------------PLAYER STATS
+	
 	public static final float PLAYER_MAX_WALK_VELOCITY = 5.0f;
 	
-	public static final float BASE_PROJECTILE_FORCE = 100 * 0.04f;  // px * pxtometer ratio
+	public static final float PLAYER_BASE_PROJECTILE_FORCE = 100 * 0.04f;  // px * pxtometer ratio
+	
+	/**
+	 * IN SECONDS
+	 */
+	public static final float PLAYER_BASE_FIRE_RATE = 1;
 }
